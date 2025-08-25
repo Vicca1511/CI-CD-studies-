@@ -1,22 +1,25 @@
-name: CI WorkFlow
-on: [push, pull_request]
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  python-lint:
+  build:
     runs-on: ubuntu-latest
-    name: CI workflow
     steps:
-    - name: checkout source repo
-      uses: actions/checkout@main
-
-    - name: linting
-      uses: programmingwithalex/pylinter@main
-      with:
-        python-root: '.'
-        flake8-flags: '--count --show-source --statistics'
-        mypy-flags: '--ignore-missing-imports'
-        fail-on-isort: false
-
+      - name: Checkout código
+        uses: actions/checkout@v4
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+      - name: Rodar testes
+        run: pytest
 
 
 
