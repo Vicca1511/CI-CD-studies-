@@ -13,7 +13,17 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
       
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      
+      - name: Install the latest version of ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "latest"    
 
+          
 
 
 
