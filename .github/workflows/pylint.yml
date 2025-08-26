@@ -31,4 +31,4 @@ jobs:
     # Passo 4: Verificar formatação com Black
     - name: Check code formatting with Black
       run: |
-        black --check .
+        black --check 
