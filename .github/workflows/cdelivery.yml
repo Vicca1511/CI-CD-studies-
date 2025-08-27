@@ -1,33 +1,61 @@
-name: Continuous Delivery 
+name: Continuous Delivery
 
 on:
   push:
     branches: [ main ]
 
-
 jobs:
   deliver:
     runs-on: ubuntu-latest
-    name: Run Linters
+    name: Package Application
+    permissions:
+      contents: read
     
     steps:
     # Passo 1: Fazer checkout do código
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Continuous Delivery
+    # Passo 2: Criar arquivo ZIP
+    - name: Create deployment package
+      run: |
+        zip -r project.zip main.py README.md requirements.txt
+
+    # Passo 3: Fazer upload do artefato
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-            name: project.zip
-            path: |
-                main.py
-                README.MD
+        name: project.zip
+        path: project.zip
+
   deploy:
     runs-on: ubuntu-latest
     needs: deliver
+    name: Deploy Application
+    permissions:
+      contents: read
+      actions: read
+    
     steps:
-    - uses: actions/download-artifact@v5
+    # Passo 1: Baixar artefato
+    - name: Download artifact
+      uses: actions/download-artifact@v4
       with:
         name: project.zip
+        path: .
+
+    # Passo 2: Verificar conteúdo
     - name: Display structure of downloaded files
-      run: ls -R
+      run: |
+        echo "Conteúdo do diretório:"
+        ls -la
+        echo ""
+        echo "Conteúdo do ZIP:"
+        unzip -l project.zip
+
+    # Passo 3: Simular deploy (adicione seus comandos reais aqui)
+    - name: Simulate deployment
+      run: |
+        echo "🚀 Iniciando processo de deployment..."
+        echo "📦 Arquivo project.zip preparado para deploy"
+        echo "✅ Deployment simulado concluído com sucesso!"
