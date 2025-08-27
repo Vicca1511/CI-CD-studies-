@@ -1,4 +1,4 @@
-name: Continuous Integration 
+name: Continuous Integration
 
 on:
   push:
@@ -9,7 +9,10 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Run Linters
+    name: Run Pylint Analysis
+    permissions:
+      contents: read
+      checks: write
     
     steps:
     # Passo 1: Fazer checkout do código
@@ -28,12 +31,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
 
-
     # Passo 4: Run Pylint
-    - name: Run Pylint with inline configuration
+    - name: Run Pylint
       run: |
         pylint --fail-under=3.0 \
                --disable=C0103,C0114,C0115,C0116,R0903,W0613,E1101,E1136 \
                --max-line-length=127 \
                main.py
-    
