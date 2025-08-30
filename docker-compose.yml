@@ -17,4 +17,4 @@ services:
       - .:/app
     command: python -m pytest -v
     depends_on:
-      - fastapi-app
+      - fastapi-app    
