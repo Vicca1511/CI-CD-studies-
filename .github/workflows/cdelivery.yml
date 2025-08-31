@@ -85,8 +85,8 @@ jobs:
         context: .
         load: true
         tags: fastapi-app:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
     
     - name: Testar imagem
       run: |
