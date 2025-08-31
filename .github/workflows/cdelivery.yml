@@ -91,9 +91,21 @@ jobs:
     - name: Testar imagem
       run: |
         docker run -d --name test-container fastapi-app:latest
-        sleep 5
-        docker exec test-container curl -f http://localhost:8000/health
+        sleep 10  # Dar mais tempo para app iniciar
+
+        docker exec test-container python -c "
+            import requests
+        try:
+          response = requests.get('http://localhost:8000/health', timeout=10)
+          print(f'✅ Health check: {response.status_code} - {response.text}')
+          if response.status_code != 200:
+            exit(1)
+        except Exception as e:
+          print(f"Error{e}")
+            exit(1)
+        "
+
         docker stop test-container
         docker rm test-container
-        echo "✅ Imagem Docker testada com sucesso!"
+        echo "✅ Imagem Docker testada com sucesso!"       
         
