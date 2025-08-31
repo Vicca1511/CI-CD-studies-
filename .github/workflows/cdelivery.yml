@@ -68,7 +68,7 @@ jobs:
         driver: docker-container    
 
   docker:
-    runs-on:  rubuntu-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Check-out
       uses: actions/checkout@v4
