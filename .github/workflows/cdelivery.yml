@@ -7,26 +7,65 @@ on:
 jobs:
   deliver:
     runs-on: ubuntu-latest
-    name: Package Application
+    name: Build and Package Application
     permissions:
       contents: read
+      packages: write
     
     steps:
     # Passo 1: Fazer checkout do código
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Passo 2: Criar arquivo ZIP
+    # 👇 NOVO: Configurar Buildx (APENAS no job deliver)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        version: latest
+        driver: docker-container
+
+    # 👇 NOVO: Build da imagem Docker com cache
+    - name: Build Docker image with Buildx
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        load: true
+        tags: fastapi-app:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    # 👇 NOVO: Testar a imagem Docker
+    - name: Test Docker image
+      run: |
+        docker run -d --name test-container fastapi-app:latest
+        sleep 5
+        docker exec test-container curl -f http://localhost:8000/health
+        docker stop test-container
+        docker rm test-container
+        echo "✅ Imagem Docker testada com sucesso!"
+
+    # Passo 2: Criar arquivo ZIP (ORIGINAL - mantido)
     - name: Create deployment package
       run: |
-        zip -r project.zip main.py README.md requirements.txt
+        zip -r project.zip main.py README.md requirements.txt Dockerfile docker-compose.yml
 
-    # Passo 3: Fazer upload do artefato
+    # Passo 3: Fazer upload do artefato (ORIGINAL - mantido)
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: project.zip
         path: project.zip
+
+    # 👇 NOVO: Salvar imagem Docker como artefato também
+    - name: Save Docker image as artifact
+      run: |
+        docker save fastapi-app:latest -o fastapi-image.tar
+      
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: fastapi-image.tar
+        path: fastapi-image.tar
 
   deploy:
     runs-on: ubuntu-latest
@@ -37,32 +76,43 @@ jobs:
       actions: read
     
     steps:
-    # Passo 1: Baixar artefato
-    - name: Download artifact
+    # Passo 1: Baixar artefatos
+    - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         name: project.zip
         path: .
 
-    # Passo 2: Verificar conteúdo
+    - name: Download Docker image
+      uses: actions/download-artifact@v4
+      with:
+        name: fastapi-image.tar
+        path: .
+
+    # Passo 2: Verificar conteúdo 
     - name: Display structure of downloaded files
       run: |
-        echo "Conteúdo do diretório:"
+        echo "📁 Conteúdo do diretório:"
         ls -la
         echo ""
-        echo "Conteúdo do ZIP:"
+        echo "📦 Conteúdo do ZIP:"
         unzip -l project.zip
+        echo ""
+        echo "🐳 Imagem Docker:"
+        docker load -i fastapi-image.tar
+        docker images
 
-    # Passo 3: Simular deploy (adicione seus comandos reais aqui)
-    - name: Simulate deployment
+    # Passo 3: Simular deploy 
+    - name: Simulate deployment with Docker
       run: |
         echo "🚀 Iniciando processo de deployment..."
         echo "📦 Arquivo project.zip preparado para deploy"
+        echo "🐳 Imagem Docker carregada:"
+        docker images | grep fastapi-app
+        echo ""
+        echo "🎯 Comandos de deploy real (exemplos):"
+        echo "docker run -d -p 8000:8000 fastapi-app:latest"
+        echo "docker-compose up -d"
+        echo "kubectl apply -f deployment.yaml"
+        echo ""
         echo "✅ Deployment simulado concluído com sucesso!"
-
-    # Configurar Buildx (APENAS no job deliver)
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-      with:
-        version: latest
-        driver: docker-container    
