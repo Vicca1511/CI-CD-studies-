@@ -14,7 +14,7 @@ jobs:
       - name: Send message to discord
         uses: ./ # Uses an action in the root directory
         with:
-          webhook: ${{ secrets.DISCORD_CONNECTION_WH }}
+          webhook: ${{ secrets.SECRETDISCORD }}
           template: 'avatar-with-link'
           include-extras: true
           # message: "Successful commit to **{{ github.context.payload.repository.owner.name }}/{{ github.context.payload.repository.name}}**.\nDiff: {{ github.context.payload.compare }}"
