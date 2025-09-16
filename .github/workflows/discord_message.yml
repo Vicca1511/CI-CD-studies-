@@ -9,7 +9,7 @@ jobs:
     name: discord commits
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Send message to discord
         uses: ./ # Uses an action in the root directory
