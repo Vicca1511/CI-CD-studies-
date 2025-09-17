@@ -1,16 +1,21 @@
-name: Discord Simple Notification
+name: Discord Notification
 
 on: 
   push:
     branches: [main]
 
 jobs:
-  discord_simple:
+  discord_notification:
     runs-on: ubuntu-latest
     steps:
-      - name: Send to Discord with curl
-        run: |
-          curl -H "Content-Type: application/json" \
-          -X POST \
-          -d '{"content": "🚀 Novo commit em '"${{ github.repository }}"' por '"${{ github.actor }}"'\n📝 '"${{ github.event.head_commit.message }}"'"}' \
-          ${{ secrets.SECRETDISCORD }}
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.SECRETDISCORD }}
+          title: "Novo Commit"
+          description: |
+            Repositório: ${{ github.repository }}
+            Autor: ${{ github.actor }}
+            Mensagem: ${{ github.event.head_commit.message }}
+          color: "0x00FF00"
+          url: "https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
