@@ -12,65 +12,28 @@ jobs:
       contents: read
     
     steps:
-    # Passo 1: Fazer checkout do código
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Passo 2: Criar arquivo ZIP
     - name: Create deployment package
       run: |
-        zip -r project.zip main.py README.md requirements.txt
+        zip -r project.zip main.py README.md requirements.txt Dockerfile
 
-    # Passo 3: Fazer upload do artefato
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: project.zip
         path: project.zip
 
-  deploy:
+  docker-build:
     runs-on: ubuntu-latest
-    needs: deliver
-    name: Deploy Application
+    needs: deliver  #  Adicionar dependência
+    name: Build and Test Docker Image
     permissions:
       contents: read
-      actions: read
     
     steps:
-    # Passo 1: Baixar artefato
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: project.zip
-        path: .
-
-    # Passo 2: Verificar conteúdo
-    - name: Display structure of downloaded files
-      run: |
-        echo "Conteúdo do diretório:"
-        ls -la
-        echo ""
-        echo "Conteúdo do ZIP:"
-        unzip -l project.zip
-
-    # Passo 3: Simular deploy (adicione seus comandos reais aqui)
-    - name: Simulate deployment
-      run: |
-        echo "🚀 Iniciando processo de deployment..."
-        echo "📦 Arquivo project.zip preparado para deploy"
-        echo "✅ Deployment simulado concluído com sucesso!"
-
-    # Configurar Buildx (APENAS no job deliver)
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-      with:
-        version: latest
-        driver: docker-container    
-
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check-out
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
@@ -79,21 +42,43 @@ jobs:
         version: latest
         driver: docker-container      
     
-    - name: Build Docker image with Buildx
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        load: true
-        tags: fastapi-app:latest
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=max
-    
-    - name: Testar imagem Docker
+    - name: Build Docker image
       run: |
-          docker build -t fastapi-app .
-          docker run -d -p 8000:8000 --name test-container fastapi-app
-          sleep 5
-          curl -f http://localhost:8000/health
-          docker stop test-container
-          docker rm test-container     
-            
+        docker build -t fastapi-app:latest .
+    
+    - name: Test Docker image
+      run: |
+        docker run -d -p 8000:8000 --name test-container fastapi-app:latest
+        sleep 10  # Aumentar tempo de espera
+        curl -f http://localhost:8000/health
+        docker stop test-container
+        docker rm test-container
+        echo "✅ Docker image tested successfully!"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [deliver, docker-build]  # Adicionar dependência do docker-build
+    name: Deploy Application
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: project.zip
+        path: .
+
+    - name: Display structure of downloaded files
+      run: |
+        echo "Directory content:"
+        ls -la
+        echo ""
+        echo "ZIP content:"
+        unzip -l project.zip
+
+    - name: Simulate deployment
+      run: |
+        echo "🚀 Starting deployment process..."
+        echo "📦 project.zip file ready for deployment"
+        echo "✅ Simulated deployment completed successfully!"

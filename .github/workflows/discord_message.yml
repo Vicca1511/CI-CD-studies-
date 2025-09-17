@@ -1,22 +1,21 @@
-name: Discord
+name: Discord Notification
 
 on: 
-  - push
+  push:
+    branches: [main]
 
 jobs:
-  disord_test_message:
+  discord_notification:
     runs-on: ubuntu-latest
-    name: discord commits
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Send message to discord
-        uses: ./ # Uses an action in the root directory
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
         with:
-          webhook: ${{ secrets.DISCORD_CONNECTION_WH }}
-          template: 'avatar-with-link'
-          include-extras: true
-          # message: "Successful commit to **{{ github.context.payload.repository.owner.name }}/{{ github.context.payload.repository.name}}**.\nDiff: {{ github.context.payload.compare }}"
-          # embed: '{ "title": "{{ commit.title }}", "description": "{{ commit.description }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://github.com/{{ commit.author.username }}.png"} }'
-          # last-commit-only: true
+          webhook: ${{ secrets.SECRETDISCORD }}
+          title: "Novo Commit"
+          description: |
+            Repositório: ${{ github.repository }}
+            Autor: ${{ github.actor }}
+            Mensagem: ${{ github.event.head_commit.message }}
+          color: "0x00FF00"
+          url: "https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
