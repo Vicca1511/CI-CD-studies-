@@ -1,22 +1,16 @@
-name: Discord
+name: Discord Simple Notification
 
 on: 
-  - push
+  push:
+    branches: [main]
 
 jobs:
-  disord_test_message:
+  discord_simple:
     runs-on: ubuntu-latest
-    name: discord commits
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Send message to discord
-        uses: ./ # Uses an action in the root directory
-        with:
-          webhook: ${{ secrets.SECRETDISCORD }}
-          template: 'avatar-with-link'
-          include-extras: true
-          # message: "Successful commit to **{{ github.context.payload.repository.owner.name }}/{{ github.context.payload.repository.name}}**.\nDiff: {{ github.context.payload.compare }}"
-          # embed: '{ "title": "{{ commit.title }}", "description": "{{ commit.description }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://github.com/{{ commit.author.username }}.png"} }'
-          # last-commit-only: true
+      - name: Send to Discord with curl
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d '{"content": "🚀 Novo commit em '"${{ github.repository }}"' por '"${{ github.actor }}"'\n📝 '"${{ github.event.head_commit.message }}"'"}' \
+          ${{ secrets.SECRETDISCORD }}
