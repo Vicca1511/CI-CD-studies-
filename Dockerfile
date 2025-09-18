@@ -2,14 +2,15 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
-# Copia primeiro os requirements para aproveitar cache do Docker
+# Define PYTHONPATH para incluir o diretório de trabalho
+ENV PYTHONPATH=/usr/src/app
+
 COPY requirements.txt requirements-dev.txt ./
 
-# Instala dependências base e dev (se existirem)
-RUN pip install --no-cache-dir -r requirements.txt && \
-    if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+RUN pip install --no-cache-dir \
+    -r requirements.txt \
+    -r requirements-dev.txt
 
-# Copia todo o código para o container
 COPY . .
 
 EXPOSE 8000

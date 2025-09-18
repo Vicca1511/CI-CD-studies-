@@ -13,8 +13,10 @@ services:
   tests:
     build: .
     container_name: fastapi_tests
-    command: ["pytest", "tests/", "-v"]
+    command: ["sh", "-c", "sleep 3 && pytest tests/ -v"]
     volumes:
       - .:/usr/src/app
+    environment:
+      - PYTHONPATH=/usr/src/app
     depends_on:
       - fastapi-app
