@@ -1,20 +1,18 @@
-version: '3.8'
+version: "3.9"
 
 services:
   fastapi-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
+    container_name: fastapi_container
     ports:
       - "8000:8000"
-    environment:
-      - ENVIRONMENT=development
+    volumes:
+      - .:/usr/src/app
+    restart: always
 
-  # Para testes (opcional)
   tests:
     build: .
+    container_name: fastapi_tests
+    command: ["pytest", "-v"]
     volumes:
-      - .:/app
-    command: python -m pytest -v
-    depends_on:
-      - fastapi-app    
+      - .:/usr/src/app
