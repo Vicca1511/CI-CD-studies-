@@ -2,9 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
+# Define PYTHONPATH para incluir o diretório de trabalho
+ENV PYTHONPATH=/usr/src/app
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-dev.txt ./
+
+RUN pip install --no-cache-dir \
+    -r requirements.txt \
+    -r requirements-dev.txt
 
 COPY . .
 
