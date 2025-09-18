@@ -2,10 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
+# Copia primeiro os requirements para aproveitar cache do Docker
+COPY requirements.txt requirements-dev.txt ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Instala dependências base e dev (se existirem)
+RUN pip install --no-cache-dir -r requirements.txt && \
+    if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+# Copia todo o código para o container
 COPY . .
 
 EXPOSE 8000

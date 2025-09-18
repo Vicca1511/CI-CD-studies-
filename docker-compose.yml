@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.8'
 
 services:
   fastapi-app:
@@ -13,6 +13,8 @@ services:
   tests:
     build: .
     container_name: fastapi_tests
-    command: ["pytest", "-v"]
+    command: ["pytest", "tests/", "-v"]
     volumes:
       - .:/usr/src/app
+    depends_on:
+      - fastapi-app

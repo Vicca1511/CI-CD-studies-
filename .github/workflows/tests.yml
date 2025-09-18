@@ -14,10 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and run tests with Docker Compose
+      - name: Set up Docker Compose
         run: |
-          docker compose build tests
+          docker compose build
+          docker compose up -d fastapi-app
           docker compose run --rm tests
